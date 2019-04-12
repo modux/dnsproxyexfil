@@ -11,11 +11,20 @@ filename = sys.argv[1]
 #create random ID for transaction to prevent caching
 ran= binascii.b2a_hex(os.urandom(2))
 
+#max total domain length as per RFC
 maxdomain=253
-rootdomain=".sub.modux.co.uk"
-numblocks=3
+
+#number of random bytes in requrst ID
+randsize=4
+#max size of request limit (9999999)
+countsize=7
+
 # represents 57 bytes after base64 - max is 63
 subdomainsize=35
+
+#calculate maximum number of blocks we can use to send data based on subdomain provided
+numblocks=(maxdomain-len(rootdomain)-randsize-countsize)/63
+
 chunksize=numblocks*subdomainsize
 
 
