@@ -6,10 +6,12 @@ import json
 from threading import Thread, Timer
 sock = socket(AF_INET, SOCK_DGRAM)
 sock.bind(('0.0.0.0', 53))
-config={"filename":" " , "receiving": 0, "writing": False}
+config={"filename":" " , "receiving": 0, "writing": False, "domain":"notsetyet"}
 
 buf = {}
 f=None
+
+
 
 def writebuffertofile():
 
@@ -54,26 +56,34 @@ def processrequest(request, addr, buf):
             an=DNSRR(rrname=dns[DNS].qd.qname, type=ptype, ttl=1, rdata=str(ip) ))
         sock.sendto(bytes(response), addr)
 
-        assert 'sub.modux.co.uk' in query
-        head, sub, modux, domain, tld, tail = query.rsplit('.', 5)
+        
+        if 'startoffile' in query:
+                head, config["domain"] = query.split('.2e0o2e.',1)
+                ran = head.split('.', 1)[0]
+
+                print "receiving file to subdomain" + config["domain"]
+                
+                if config['receiving'] != 0:
+                        return
+                config['receiving'] = ran
+                ran, count, config['filename'] = head.split('.',2) # drop leading "prefix." part
+                print 'creating file ' + config['filename']
+
+
+                buf = {}
+                
+        assert config["domain"] in query
+        
+        head = query.rsplit(config["domain"], 1)[0]
 
         ran = head.split('.', 1)[0]
         head = head.split('.', 1)[-1] #remove random bytes
         count = head.split('.', 1)[0]
         head = head.split('.', 1)[-1] # remove random leading bytes
+        head=head.replace('.','')
+        # remove random leading bits
 
-         # remove random leading bits
-        if 'startoffile' in head:
-
-                if config['receiving'] != 0:
-                        return
-                config['receiving'] = ran
-                config['filename'] = head.split('.', 1)[-1]  # drop leading "prefix." part
-                print 'creating file ' + config['filename']
-
-
-                buf = {}
-        elif 'endoffile' in head:
+        if 'endoffile' in query:
 
                 if config['receiving'] != ran:
 
@@ -87,7 +97,8 @@ def processrequest(request, addr, buf):
 
                 r = Timer(20.0, writebuffertofile)
                 r.start()
-        elif config['receiving'] == ran:
+        
+        if config['receiving'] == ran:
 
 
                 head=head.replace('-', '=')

