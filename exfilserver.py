@@ -19,12 +19,14 @@ def writebuffertofile():
         with open(config['filename'], 'wb') as file:
 
                 for key, value in buf.iteritems():
-                        value=base64.b32decode(value.upper())
-                        file.write(value)
+                        print value
+                        decoded=base64.b32decode(value.upper())
+                        file.write(decoded)
                 file.close()
         print 'closing file'
         config['receiving'] = 0
-        config['writing'] = False
+#        config['writing'] = False
+        quit()
 
 
 def processrequest(request, addr, buf):
@@ -41,8 +43,8 @@ def processrequest(request, addr, buf):
                 ptype='AAAA'
                 ip='2a00:1450:4009:80f::200e'
         else:
-                assert 1==2
-
+             
+                return
         query = dns[DNSQR].qname.decode('ascii')  # test.1.2.3.4.example.com.
 
         response = DNS(
@@ -61,12 +63,14 @@ def processrequest(request, addr, buf):
                 head, config["domain"] = query.split('.2e0o2e.',1)
                 ran = head.split('.', 1)[0]
 
-                print "receiving file to subdomain" + config["domain"]
                 
                 if config['receiving'] != 0:
                         return
+
+                print "receiving file to subdomain" + config["domain"]
+
                 config['receiving'] = ran
-                ran, count, config['filename'] = head.split('.',2) # drop leading "prefix." part
+                ran, count, startoffile, config['filename'] = head.split('.',3) # drop leading "prefix." part
                 print 'creating file ' + config['filename']
 
 

